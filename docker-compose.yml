@@ -1,0 +1,21 @@
+{
+  "version": "3.8",
+  "services": {
+    "postgres": {
+      "container_name": "x-wishlists-postgres",
+      "image": "postgres:15",
+      "restart": "unless-stopped",
+      "environment": [
+        "POSTGRES_USER=x-wishlists",
+        "POSTGRES_PASSWORD=x-wishlists",
+        "POSTGRES_DB=x-wishlists"
+      ],
+      "volumes": [
+        "./database:/var/lib/postgresql/data"
+      ],
+      "ports": [
+        "55432:5432"
+      ]
+    }
+  }
+}
