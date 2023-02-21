@@ -50,6 +50,11 @@ SELECT "name"
 FROM "return";
 $$ LANGUAGE SQL;
 --
+-- Add the procedure that will be used on the trigger
+CREATE OR REPLACE FUNCTION public.set_slug_from_name() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN NEW.slug := slugify(NEW.name);
+RETURN NEW;
+END $$;
+--
 -- Add the trigger to the wishlists table
 CREATE TRIGGER "wishlists_slug_insert" BEFORE
 INSERT ON "wishlists" FOR EACH ROW

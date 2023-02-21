@@ -23,17 +23,24 @@ REVOKE
 SELECT,
 	INSERT,
 	UPDATE,
-	DELETE ON wishlist_items
+	DELETE ON wishlist_items;
+FROM wishlist_user;
+REVOKE
+SELECT,
+	INSERT,
+	UPDATE,
+	DELETE ON wishlist_settings
 FROM wishlist_user;
 DROP POLICY users_select_rls_policy on users;
 DROP POLICY users_insert_rls_policy on users;
 DROP POLICY users_update_rls_policy on users;
 DROP POLICY wishlists_rls_policy on wishlists;
-DROP POLICY anonymous_wishlists_rls_policy on wishlists;
 DROP POLICY wishlist_items_rls_policy on wishlist_items;
+DROP POLICY wishlist_settings_rls_policy on wishlist_settings;
 ALTER TABLE users DISABLE ROW LEVEL SECURITY;
 ALTER TABLE wishlists DISABLE ROW LEVEL SECURITY;
 ALTER TABLE wishlist_items DISABLE ROW LEVEL SECURITY;
+ALTER TABLE wishlist_settings DISABLE ROW LEVEL SECURITY;
 DROP ROLE wishlist_user;
 COMMIT;
 -------------------------------------------------
@@ -54,6 +61,9 @@ GRANT SELECT,
 GRANT SELECT,
 	INSERT,
 	UPDATE ON wishlist_items TO wishlist_user;
+GRANT SELECT,
+	INSERT,
+	UPDATE ON wishlist_settings TO wishlist_user;
 -- IDK why sequences need its own permission
 GRANT USAGE,
 	SELECT ON SEQUENCE slugs_id_seq TO wishlist_user;
@@ -61,6 +71,8 @@ GRANT USAGE,
 	SELECT ON SEQUENCE wishlists_id_seq TO wishlist_user;
 GRANT USAGE,
 	SELECT ON SEQUENCE wishlist_items_id_seq TO wishlist_user;
+GRANT USAGE,
+	SELECT ON SEQUENCE wishlist_settings_id_seq TO wishlist_user;
 -- users table is always insertable (create new users)
 CREATE POLICY users_insert_rls_policy ON public.users FOR
 INSERT TO wishlist_user WITH CHECK (true);
@@ -80,10 +92,6 @@ CREATE POLICY wishlists_rls_policy ON public.wishlists FOR ALL TO wishlist_user 
 ) WITH CHECK (
 	user_id = current_setting('app.current_user_id')::int4
 );
--- but visible for everyone. Change for private wishlists
-CREATE POLICY anonymous_wishlists_rls_policy ON public.wishlists FOR
-SELECT TO wishlist_user USING (true);
--- Exactly same thing for wishlist_items
 CREATE POLICY wishlist_items_rls_policy ON public.wishlist_items FOR ALL TO wishlist_user USING (
 	wishlist_id IN (
 		SELECT id
@@ -97,13 +105,24 @@ CREATE POLICY wishlist_items_rls_policy ON public.wishlist_items FOR ALL TO wish
 		WHERE user_id = current_setting('app.current_user_id')::int4
 	)
 );
--- but visible for everyone. Maybe change for private wishlists?
-CREATE POLICY anonymous_wishlist_items_rls_policy ON public.wishlist_items FOR
-SELECT TO wishlist_user USING (true);
+CREATE POLICY wishlist_settings_rls_policy ON public.wishlist_settings FOR ALL TO wishlist_user USING (
+	wishlist_id IN (
+		SELECT id
+		FROM public.wishlists
+		WHERE user_id = current_setting('app.current_user_id')::int4
+	)
+) WITH CHECK (
+	wishlist_id IN (
+		SELECT id
+		FROM public.wishlists
+		WHERE user_id = current_setting('app.current_user_id')::int4
+	)
+);
 -- Then enable RLS for each table
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wishlists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wishlist_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE wishlist_settings ENABLE ROW LEVEL SECURITY;
 COMMIT;
 ------------
 -- -- This is the database user we'll use for all the queries
