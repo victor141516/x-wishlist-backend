@@ -36,3 +36,11 @@ ALTER TABLE "public"."wishlist_items"
 ADD FOREIGN KEY ("wishlist_id") REFERENCES "public"."wishlists"("id");
 ALTER TABLE "public"."wishlists"
 ADD FOREIGN KEY ("user_id") REFERENCES "public"."users"("id");
+--
+-- Add a function to handle bought count increment
+CREATE OR REPLACE FUNCTION increment_bought_count_wishlist_item (wishlist_item_id int4) RETURNS int4 AS $$
+UPDATE wishlist_items
+SET bought_count = bought_count + 1
+WHERE id = wishlist_item_id
+RETURNING bought_count;
+$$ LANGUAGE SQL;

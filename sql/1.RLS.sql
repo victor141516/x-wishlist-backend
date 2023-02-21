@@ -29,6 +29,7 @@ DROP POLICY users_select_rls_policy on users;
 DROP POLICY users_insert_rls_policy on users;
 DROP POLICY users_update_rls_policy on users;
 DROP POLICY wishlists_rls_policy on wishlists;
+DROP POLICY anonymous_wishlists_rls_policy on wishlists;
 DROP POLICY wishlist_items_rls_policy on wishlist_items;
 ALTER TABLE users DISABLE ROW LEVEL SECURITY;
 ALTER TABLE wishlists DISABLE ROW LEVEL SECURITY;
@@ -73,14 +74,15 @@ CREATE POLICY users_update_rls_policy ON public.users FOR
 UPDATE TO wishlist_user WITH CHECK (
 		id = current_setting('app.current_user_id')::int4
 	);
--- wishlists are only available for the own user
--- Maybe we'll have to change this since other users have to be allowed to see other users wishlists
--- Other option is to have a new database user to handle that kind of viewers
+-- wishlists are only editable for the own user
 CREATE POLICY wishlists_rls_policy ON public.wishlists FOR ALL TO wishlist_user USING (
 	user_id = current_setting('app.current_user_id')::int4
 ) WITH CHECK (
 	user_id = current_setting('app.current_user_id')::int4
 );
+-- but visible for everyone. Change for private wishlists
+CREATE POLICY anonymous_wishlists_rls_policy ON public.wishlists FOR
+SELECT TO wishlist_user USING (true);
 -- Exactly same thing for wishlist_items
 CREATE POLICY wishlist_items_rls_policy ON public.wishlist_items FOR ALL TO wishlist_user USING (
 	wishlist_id IN (
@@ -95,6 +97,9 @@ CREATE POLICY wishlist_items_rls_policy ON public.wishlist_items FOR ALL TO wish
 		WHERE user_id = current_setting('app.current_user_id')::int4
 	)
 );
+-- but visible for everyone. Maybe change for private wishlists?
+CREATE POLICY anonymous_wishlist_items_rls_policy ON public.wishlist_items FOR
+SELECT TO wishlist_user USING (true);
 -- Then enable RLS for each table
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE wishlists ENABLE ROW LEVEL SECURITY;
