@@ -27,9 +27,9 @@
 		"/**/*.js"
 	],
 	"dependencies": {
+		"cors": "^2.8.5",
 		"express": "^4.18.2",
-		"jsdom": "^20.0.3",
-		"node-fetch": "^3.3.0",
+		"jsonwebtoken": "^9.0.0",
 		"postgraphile": "^4.13.0"
 	},
 	"devDependencies": {
@@ -39,12 +39,12 @@
 		"@babel/preset-typescript": "^7.18.6",
 		"@types/babel__core": "^7.1.20",
 		"@types/babel__preset-env": "^7.9.2",
+		"@types/cors": "^2.8.13",
 		"@types/eslint": "^8.4.10",
 		"@types/eslint-plugin-prettier": "^3.1.0",
 		"@types/express": "^4.17.17",
-		"@types/jsdom": "^20.0.1",
+		"@types/jsonwebtoken": "^9.0.1",
 		"@types/node": "^18.11.12",
-		"@types/node-fetch": "^3.0.2",
 		"@types/prettier": "^2.7.1",
 		"@typescript-eslint/eslint-plugin": "^5.46.0",
 		"@typescript-eslint/parser": "^5.46.0",
